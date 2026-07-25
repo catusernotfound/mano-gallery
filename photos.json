@@ -419,6 +419,13 @@
       "caption": "",
       "path": "photos/main/1785006722101_IMG_20260104_230738_189.jpg",
       "type": "image"
+    },
+    {
+      "id": "1785006821706-843bwl",
+      "name": "VID-20260512-WA0057.mp4",
+      "caption": "",
+      "path": "photos/main/1785006817245_VID-20260512-WA0057.mp4",
+      "type": "video"
     }
   ],
   "secret": []
