@@ -1,4 +1,12 @@
 {
-     "main": [],
-     "secret": []
-   }
+  "main": [
+    {
+      "id": "1785001403976-7ixk4n",
+      "name": "WhatsApp Image 2026-07-23 at 8.40.56 AM.jpeg",
+      "caption": "",
+      "path": "photos/main/1785001401059_WhatsApp_Image_2026-07-23_at_8.jpg",
+      "type": "image"
+    }
+  ],
+  "secret": []
+}
