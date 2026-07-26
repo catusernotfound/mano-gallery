@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mano ✨</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<style>
+  :root{
+    --pink: #ffb8d9;
+    --pink-deep: #ff7fb0;
+    --cream: #fff6f2;
+    --plum: #4a2545;
+    --mint: #baf2d9;
+    --ink: #2e1a2b;
+    --paper: #ffffff;
+    --muted: #8a6b83;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 20%, var(--pink) 0%, transparent 45%),
+      radial-gradient(circle at 85% 10%, var(--mint) 0%, transparent 40%),
+      var(--cream);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+  }
+
+  header{
+    padding: 48px 24px 24px;
+    text-align:center;
+  }
+
+  h1{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-weight: 900;
+    font-style: italic;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    margin:0;
+    color: var(--plum);
+    letter-spacing: -1px;
+  }
+
+  h1 .paw{
+    font-style:normal;
+    display:inline-block;
+    transform: rotate(-12deg);
+  }
+
+  .tagline{
+    margin-top:10px;
+    font-size:0.95rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color: var(--pink-deep);
+    font-weight:600;
+  }
+
+  .counter{
+    margin-top:6px;
+    font-size:0.85rem;
+    color: var(--muted);
+  }
+
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding: 0 24px 40px;
+  }
+
+  .dropzone{
+    border: 3px dashed var(--pink-deep);
+    border-radius: 20px;
+    background: rgba(255,255,255,0.5);
+    padding: 40px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition: all .2s ease;
+    margin-bottom: 30px;
+    display:none;
+  }
+
+  body.admin-on .dropzone{ display:block; }
+
+  .dropzone.drag-over{
+    background: rgba(255,184,217,0.35);
+    border-color: var(--plum);
+    transform: scale(1.01);
+  }
+
+  .dropzone.uploading{
+    opacity:0.6;
+    pointer-events:none;
+  }
+
+  .dropzone .icon{
+    font-size:2.4rem;
+    display:block;
+    margin-bottom:8px;
+  }
+
+  .dropzone p{
+    margin:4px 0;
+    font-weight:600;
+    color: var(--plum);
+  }
+
+  .dropzone span{
+    font-size:0.85rem;
+    color: var(--muted);
+    font-weight:400;
+  }
+
+  input[type="file"]{ display:none; }
+
+  .gallery{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 22px;
+  }
+
+  .card{
+    position:relative;
+    background: var(--paper);
+    border-radius: 16px;
+    overflow:hidden;
+    box-shadow: 0 6px 18px rgba(74,37,69,0.12);
+    transform: rotate(var(--tilt));
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+
+  .card:hover{
+    transform: rotate(0deg) translateY(-4px);
+    box-shadow: 0 14px 28px rgba(74,37,69,0.22);
+    z-index:2;
+  }
+
+  .card img,
+  .card video{
+    width:100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display:block;
+    cursor: zoom-in;
+    background: #000;
+  }
+
+  .card .label{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 28px 12px 12px;
+    background: linear-gradient(to top, rgba(74,37,69,0.82) 0%, transparent 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .22s ease, transform .22s ease;
+    border-radius: 0 0 16px 16px;
+  }
+
+  .card:hover .label{ opacity:1; transform: translateY(0); }
+
+  /* Always show label when caption exists so it's not hidden from visitors */
+  .card.has-caption .label{ opacity:1; transform: translateY(0); }
+
+  .card .caption-text{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: #fff;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    letter-spacing: 0.01em;
+  }
+
+  .card .caption-input{
+    flex: 1;
+    min-width: 0;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.45);
+    background: transparent;
+    font-size: 0.82rem;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    color: #fff;
+    padding: 2px 0;
+    outline: none;
+  }
+
+  .card .caption-input::placeholder{ color: rgba(255,255,255,0.55); }
+
+  .card .caption-input:focus{
+    border-bottom-color: var(--pink);
+  }
+
+  .card .actions{
+    display:flex;
+    gap:4px;
+    flex-shrink:0;
+  }
+
+  .card button{
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: 0.8rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 7px;
+    border-radius: 20px;
+    color: #fff;
+    backdrop-filter: blur(4px);
+    transition: background .15s ease;
+  }
+
+  .card button:hover{
+    background: rgba(255,255,255,0.35);
+    color: #fff;
+  }
+
+  .card .remove{ display:none; }
+  body.admin-on .card .remove{ display:inline-block; }
+
+  .card .drag-handle{
+    display:none;
+    position:absolute;
+    top:8px;
+    left:8px;
+    background: rgba(255,255,255,0.85);
+    border-radius:8px;
+    padding:3px 6px;
+    font-size:0.85rem;
+    cursor:grab;
+    color: var(--plum);
+    z-index:3;
+  }
+
+  body.admin-on .card .drag-handle{ display:block; }
+  body.admin-on .card{ cursor:grab; }
+
+  .card.dragging{ opacity:0.35; }
+
+  .card.drag-over-target{
+    outline: 3px dashed var(--pink-deep);
+    outline-offset: -3px;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding: 30px 10px 10px;
+    color: var(--muted);
+    grid-column: 1 / -1;
+  }
+
+  .empty-state .big{
+    font-size:2.2rem;
+    display:block;
+    margin-bottom:6px;
+  }
+
+  /* Lightbox */
+  #lightbox{
+    position:fixed;
+    inset:0;
+    background: rgba(46,26,43,0.9);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 30px;
+    z-index: 50;
+    cursor: zoom-out;
+  }
+
+  #lightbox.open{ display:flex; }
+
+  #lightbox img,
+  #lightbox video{
+    max-width:100%;
+    max-height:90vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    display:none;
+  }
+
+  /* Cute floating background */
+  .bg-float{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .bg-float span{
+    position:absolute;
+    bottom:-10%;
+    font-size: 1.6rem;
+    opacity:0.35;
+    animation: floatUp linear infinite;
+    filter: drop-shadow(0 2px 3px rgba(74,37,69,0.08));
+  }
+
+  @keyframes floatUp{
+    0%{
+      transform: translateY(0) translateX(0) rotate(0deg);
+      opacity:0;
+    }
+    10%{
+      opacity:0.35;
+    }
+    90%{
+      opacity:0.3;
+    }
+    100%{
+      transform: translateY(-115vh) translateX(var(--drift, 20px)) rotate(var(--spin, 25deg));
+      opacity:0;
+    }
+  }
+
+  header, main{
+    position:relative;
+    z-index:1;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .bg-float{ display:none; }
+  }
+
+  #lightbox img.show,
+  #lightbox video.show{ display:block; }
+
+  /* Secret trigger */
+  .secret-zone{
+    text-align:center;
+    padding: 20px 20px 10px;
+  }
+
+  #secretBtn{
+    background:none;
+    border:none;
+    font-size: 1rem;
+    color: rgba(74,37,69,0.18);
+    cursor:pointer;
+    padding: 10px 16px;
+    border-radius: 8px;
+    transition: color .2s ease;
+    user-select:none;
+  }
+
+  #secretBtn:hover,
+  #secretBtn:focus-visible{
+    color: rgba(74,37,69,0.5);
+  }
+
+  #secretSection{
+    max-width:1100px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+    display:none;
+  }
+
+  #secretSection.open{
+    display:block;
+    animation: reveal .4s ease;
+  }
+
+  @keyframes reveal{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .secret-header{
+    text-align:center;
+    margin-bottom: 24px;
+  }
+
+  .secret-header h2{
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    color: var(--plum);
+    margin: 0 0 6px;
+  }
+
+  .secret-header p{
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin:0;
+  }
+
+  footer{
+    text-align:center;
+    padding: 20px 20px 60px;
+    font-size:0.78rem;
+    color: var(--muted);
+    position:relative;
+  }
+
+  #adminTrigger{
+    position:fixed;
+    bottom:10px;
+    right:10px;
+    width:26px;
+    height:26px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    opacity:0.2;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index:40;
+    border-radius:50%;
+    font-size:1rem;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+  }
+
+  body.admin-on #adminTrigger{ display:none; }
+
+  #adminTrigger:hover,
+  #adminTrigger:focus-visible{
+    opacity:0.5;
+    transform: scale(1.15);
+  }
+
+  #adminBar{
+    display:none;
+    position:sticky;
+    top:0;
+    z-index:30;
+    background: var(--plum);
+    color: var(--cream);
+    text-align:center;
+    padding: 10px 16px;
+    font-size:0.82rem;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+
+  body.admin-on #adminBar{ display:flex; }
+
+  #adminBar button{
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--cream);
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor:pointer;
+    font-size:0.8rem;
+  }
+
+  #adminBar button:hover{
+    background: rgba(255,255,255,0.28);
+  }
+
+  #syncStatus{
+    opacity:0.75;
+    font-size:0.76rem;
+  }
+
+  /* Token modal */
+  #authModal{
+    position:fixed;
+    inset:0;
+    background: rgba(46,26,43,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    padding:20px;
+  }
+
+  #authModal.open{ display:flex; }
+
+  .modal-box{
+    background: var(--paper);
+    border-radius: 18px;
+    padding: 28px 26px;
+    width:100%;
+    max-width:340px;
+    text-align:center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  }
+
+  .modal-box h3{
+    margin:0 0 6px;
+    color: var(--plum);
+    font-family: Georgia, serif;
+    font-style: italic;
+  }
+
+  .modal-box p{
+    margin:0 0 16px;
+    font-size:0.8rem;
+    color: var(--muted);
+  }
+
+  .modal-box input{
+    width:100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--pink);
+    font-size:0.9rem;
+    margin-bottom:10px;
+    outline:none;
+    font-family: monospace;
+  }
+
+  .modal-box input:focus{
+    border-color: var(--plum);
+  }
+
+  .modal-box .row{
+    display:flex;
+    gap:8px;
+  }
+
+  .modal-box .row button{
+    flex:1;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border:none;
+    cursor:pointer;
+    font-size:0.85rem;
+    font-weight:600;
+  }
+
+  .modal-box .go{
+    background: var(--plum);
+    color: var(--cream);
+  }
+
+  .modal-box .cancel{
+    background: var(--cream);
+    color: var(--plum);
+  }
+
+  .modal-error{
+    color: var(--pink-deep);
+    font-size:0.78rem;
+    min-height:16px;
+    margin: -4px 0 8px;
+  }
+
+  #setupNotice{
+    max-width:600px;
+    margin: 0 auto 30px;
+    padding: 16px 20px;
+    background: #fff3cd;
+    border: 2px solid #e0b84c;
+    border-radius: 14px;
+    font-size:0.85rem;
+    color: #6b5518;
+    text-align:center;
+  }
+
+  #setupNotice code{
+    background: rgba(0,0,0,0.06);
+    padding:1px 5px;
+    border-radius:4px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card, .dropzone, #secretSection{ transition:none; animation:none; }
+  }
+
+  :focus-visible{
+    outline: 3px solid var(--plum);
+    outline-offset: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="bg-float" id="bgFloat" aria-hidden="true"></div>
+
+<div id="adminBar">
+  <span>🔓 admin mode</span>
+  <span id="syncStatus">synced</span>
+  <button id="lockBtn">Sign out</button>
+</div>
+
+<header>
+  <h1><span class="paw">🐾</span> Mano</h1>
+  <div class="tagline">a shrine to the best cat</div>
+  <div class="counter" id="mainCounter">0 photos on file</div>
+</header>
+
+<main>
+  <div id="setupNotice" style="display:none;">
+    GitHub isn't configured yet — open this file and fill in <code>REPO_OWNER</code> and
+    <code>REPO_NAME</code> near the bottom of the script. See the setup guide for details.
+  </div>
+
+  <div class="dropzone" id="mainDropzone" tabindex="0" role="button" aria-label="Upload photos or videos of Mano">
+    <span class="icon">🐱</span>
+    <p>Drop photos or videos of Mano here</p>
+    <span>or click to browse — JPG, PNG, GIF, WebP, MP4, WebM</span>
+    <input type="file" id="mainFileInput" accept="image/*,video/*" multiple>
+  </div>
+
+  <div class="gallery" id="mainGallery"></div>
+</main>
+
+<div class="secret-zone">
+  <button id="secretBtn" aria-label="Something's here">🐾</button>
+</div>
+
+<div id="secretSection">
+  <div class="secret-header">
+    <h2>the archive</h2>
+    <p id="secretCounter">0 toe beans on file</p>
+  </div>
+
+  <div class="dropzone" id="secretDropzone" tabindex="0" role="button" aria-label="Upload feet photos or videos of Mano">
+    <span class="icon">🐾</span>
+    <p>Drop the toe beans here</p>
+    <span>or click to browse — JPG, PNG, GIF, WebP, MP4, WebM</span>
+    <input type="file" id="secretFileInput" accept="image/*,video/*" multiple>
+  </div>
+
+  <div class="gallery" id="secretGallery"></div>
+</div>
+
+<div id="lightbox">
+  <img id="lightboxImg" src="" alt="Enlarged photo">
+  <video id="lightboxVideo" controls></video>
+</div>
+
+<footer>made with love, for Mano 🐾</footer>
+
+<button id="adminTrigger" aria-label="admin">👣</button>
+
+<div id="authModal">
+  <div class="modal-box">
+    <h3>Admin sign in</h3>
+    <p>Paste your GitHub token to unlock uploads. It's only kept in memory for this session — never saved anywhere.</p>
+    <input type="password" id="authToken" placeholder="github_pat_..." autocomplete="off">
+    <div class="modal-error" id="authError"></div>
+    <div class="row">
+      <button class="cancel" id="authCancel">Cancel</button>
+      <button class="go" id="authGo">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- Cute floating background ----------
+  (function initBgFloat(){
+    const container = document.getElementById('bgFloat');
+    if (!container) return;
+    const symbols = ['🐾','🐾','💗','✨','🐾','💕'];
+    const count = 18;
+    for (let i = 0; i < count; i++){
+      const el = document.createElement('span');
+      el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      const left = Math.random() * 100;
+      const duration = 14 + Math.random() * 14;
+      const delay = Math.random() * -duration;
+      const drift = (Math.random() * 160 - 80).toFixed(0) + 'px';
+      const spin = (Math.random() * 60 - 30).toFixed(0) + 'deg';
+      const size = (1 + Math.random() * 1.2).toFixed(2) + 'rem';
+      el.style.left = left + '%';
+      el.style.fontSize = size;
+      el.style.animationDuration = duration + 's';
+      el.style.animationDelay = delay + 's';
+      el.style.setProperty('--drift', drift);
+      el.style.setProperty('--spin', spin);
+      container.appendChild(el);
+    }
+  })();
+
+  // ============================================================
+  // FILL THESE IN — see the setup guide for exact steps
+  // ============================================================
+  const REPO_OWNER = "catusernotfound";
+  const REPO_NAME  = "mano-gallery";
+  const BRANCH     = "main";
+  const DATA_PATH  = "photos.json";
+  // ============================================================
+
+  const notConfigured = REPO_OWNER.startsWith('PASTE_') || REPO_NAME.startsWith('PASTE_');
+  if (notConfigured){
+    document.getElementById('setupNotice').style.display = 'block';
+  }
+
+  let isAdmin = false;
+  let ghToken = null; // kept only in memory, never persisted
+  let writeQueue = Promise.resolve(); // serializes writes so they don't clobber each other
+
+  const RAW_BASE = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}`;
+  const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`;
+
+  function fileUrl(path){
+    return `${RAW_BASE}/${path}`;
+  }
+
+  // ---------- GitHub API helpers (admin only) ----------
+  function ghHeaders(){
+    return {
+      Authorization: `token ${ghToken}`,
+      Accept: 'application/vnd.github+json'
+    };
+  }
+
+  async function ghGetJson(path){
+    // Bypassing the cache matters here: the browser can cache this GET for
+    // up to a minute, so right after a save the very next read can return a
+    // stale sha — and every retry in the write loop keeps getting served
+    // that same stale sha from cache, so the PUT fails with 409 every time
+    // instead of just once.
+    const res = await fetch(`${API_BASE}/contents/${path}?ref=${BRANCH}&_=${Date.now()}`, {
+      headers: ghHeaders(),
+      cache: 'no-store'
+    });
+    if (res.status === 404){
+      const defaultData = { main: [], secret: [] };
+      const putRes = await ghPutJson(path, defaultData, 'Initialize gallery data');
+      return { data: defaultData, sha: putRes.content.sha };
+    }
+    if (!res.ok) throw new Error(`GitHub GET ${path} failed (${res.status})`);
+    const file = await res.json();
+    const text = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    return { data: JSON.parse(text), sha: file.sha };
+  }
+
+  async function ghPutJson(path, dataObj, message, sha){
+    const text = JSON.stringify(dataObj, null, 2);
+    const content = btoa(unescape(encodeURIComponent(text)));
+    const body = { message, content, branch: BRANCH };
+    if (sha) body.sha = sha;
+    const res = await fetch(`${API_BASE}/contents/${path}`, {
+      method: 'PUT',
+      headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`GitHub PUT ${path} failed (${res.status})`);
+    return res.json();
+  }
+
+  async function ghPutBinary(path, base64Content, message){
+    const body = { message, content: base64Content, branch: BRANCH };
+    const res = await fetch(`${API_BASE}/contents/${path}`, {
+      method: 'PUT',
+      headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`GitHub PUT ${path} failed (${res.status})`);
+    return res.json();
+  }
+
+  async function ghDeleteFile(path, message){
+    try {
+      const getRes = await fetch(`${API_BASE}/contents/${path}?ref=${BRANCH}`, { headers: ghHeaders() });
+      if (!getRes.ok) return; // already gone, nothing to do
+      const file = await getRes.json();
+      await fetch(`${API_BASE}/contents/${path}`, {
+        method: 'DELETE',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, sha: file.sha, branch: BRANCH })
+      });
+    } catch (err){
+      console.error('Could not delete file from repo:', err);
+    }
+  }
+
+  // Runs a write op one-at-a-time so rapid edits don't overwrite each other
+  let lastAlertTime = 0;
+  function queueWrite(fn){
+    writeQueue = writeQueue.then(fn).catch((err) => {
+      console.error(err);
+      const now = Date.now();
+      if (now - lastAlertTime > 2000){
+        lastAlertTime = now;
+        alert(`Save failed: ${err.message || err}\n\nCheck the browser console for full details.`);
+      }
+    });
+    return writeQueue;
+  }
+
+  async function loadData(){
+    if (isAdmin && ghToken){
+      return ghGetJson(DATA_PATH);
+    }
+    const res = await fetch(`${fileUrl(DATA_PATH)}?t=${Date.now()}`);
+    if (!res.ok) return { data: { main: [], secret: [] }, sha: null };
+    const data = await res.json();
+    return { data, sha: null };
+  }
+
+  // ---------- Lightbox ----------
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxVideo = document.getElementById('lightboxVideo');
+
+  function openLightbox(url, name, type){
+    if (type === 'video'){
+      lightboxVideo.src = url;
+      lightboxVideo.classList.add('show');
+      lightboxImg.classList.remove('show');
+      lightboxImg.src = '';
+    } else {
+      lightboxImg.src = url;
+      lightboxImg.alt = name;
+      lightboxImg.classList.add('show');
+      lightboxVideo.classList.remove('show');
+      lightboxVideo.pause();
+      lightboxVideo.removeAttribute('src');
+    }
+    lightbox.classList.add('open');
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('open');
+    lightboxImg.src = '';
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute('src');
+  }
+
+  lightbox.addEventListener('click', (e) => {
+    if (e.target === lightboxVideo) return;
+    closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  async function downloadPhoto(url, name){
+    // The `download` attribute is ignored by browsers for cross-origin URLs
+    // (raw.githubusercontent.com), so a plain <a download> just opens the
+    // file in a new tab instead of saving it. Fetch it as a blob first so
+    // the download actually happens.
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`fetch failed (${res.status})`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = name || 'photo.jpg';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (err){
+      console.error('Download failed, opening in a new tab instead:', err);
+      window.open(url, '_blank');
+    }
+  }
+
+  // Resize + re-encode images before upload
+  function compressImage(file, maxDim = 1600, quality = 0.82){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim){
+          if (width >= height){
+            height = Math.round(height * (maxDim / width));
+            width = maxDim;
+          } else {
+            width = Math.round(width * (maxDim / height));
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        // JPEG has no alpha channel — without this, transparent PNGs turn
+        // black wherever they were see-through.
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(objectUrl);
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+      };
+      img.onerror = (err) => { URL.revokeObjectURL(objectUrl); reject(err); };
+      img.src = objectUrl;
+    });
+  }
+
+  function blobToBase64(blob){
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  let debounceTimers = {};
+  function debounce(key, fn, delay = 700){
+    clearTimeout(debounceTimers[key]);
+    debounceTimers[key] = setTimeout(fn, delay);
+  }
+
+  function setSyncStatus(text){
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = text;
+  }
+
+  // ---------- Gallery factory ----------
+  const galleries = {};
+
+  function createGallery(config){
+    const { key, dropzoneId, fileInputId, galleryId, counterId, emptyText, counterWord } = config;
+
+    const dropzone = document.getElementById(dropzoneId);
+    const fileInput = document.getElementById(fileInputId);
+    const gallery = document.getElementById(galleryId);
+    const counter = document.getElementById(counterId);
+
+    let photos = []; // { id, name, caption, path, type }
+
+    function renderEmptyState(){
+      gallery.innerHTML = `
+        <div class="empty-state">
+          <span class="big">🐾</span>
+          ${emptyText}
+        </div>`;
+    }
+
+    function updateCounter(){
+      const n = photos.length;
+      counter.textContent = n === 0
+        ? `0 ${counterWord} on file`
+        : `${n} ${counterWord}${n === 1 ? '' : 's'} on file`;
+    }
+
+    function addCard(photo, index){
+      const url = fileUrl(photo.path);
+      const card = document.createElement('div');
+      card.className = photo.caption ? 'card has-caption' : 'card';
+      card.style.setProperty('--tilt', `${(Math.random() * 4 - 2).toFixed(2)}deg`);
+      card.dataset.id = photo.id;
+      card.dataset.index = index;
+      card.draggable = isAdmin;
+
+      if (isAdmin){
+        const handle = document.createElement('div');
+        handle.className = 'drag-handle';
+        handle.textContent = '⠿';
+        card.appendChild(handle);
+      }
+
+      const media = photo.type === 'video' ? document.createElement('video') : document.createElement('img');
+      if (photo.type === 'video'){
+        media.src = url;
+        media.muted = true;
+        media.playsInline = true;
+        media.addEventListener('mouseenter', () => media.play().catch(() => {}));
+        media.addEventListener('mouseleave', () => { media.pause(); media.currentTime = 0; });
+      } else {
+        media.src = url;
+        media.alt = photo.caption || photo.name;
+        media.loading = 'lazy';
+      }
+      media.addEventListener('click', () => openLightbox(url, photo.caption || photo.name, photo.type));
+
+      const label = document.createElement('div');
+      label.className = 'label';
+
+      let captionEl;
+      if (isAdmin){
+        captionEl = document.createElement('input');
+        captionEl.className = 'caption-input';
+        captionEl.type = 'text';
+        captionEl.placeholder = 'Add a caption…';
+        captionEl.value = photo.caption || '';
+        captionEl.addEventListener('click', (e) => e.stopPropagation());
+        captionEl.addEventListener('input', () => {
+          const val = captionEl.value;
+          card.classList.toggle('has-caption', val.length > 0);
+          debounce(photo.id, () => saveCaption(photo.id, val));
+        });
+      } else {
+        captionEl = document.createElement('span');
+        captionEl.className = 'caption-text';
+        captionEl.textContent = photo.caption || photo.name;
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const dl = document.createElement('button');
+      dl.setAttribute('aria-label', `Download ${photo.name}`);
+      dl.textContent = '⬇';
+      dl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadPhoto(url, photo.name);
+      });
+
+      const remove = document.createElement('button');
+      remove.className = 'remove';
+      remove.setAttribute('aria-label', `Remove ${photo.name}`);
+      remove.textContent = '✕';
+      remove.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePhoto(photo.id);
+      });
+
+      actions.appendChild(dl);
+      actions.appendChild(remove);
+      label.appendChild(captionEl);
+      label.appendChild(actions);
+      card.appendChild(media);
+      card.appendChild(label);
+
+      if (isAdmin){
+        card.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', String(index));
+          e.dataTransfer.effectAllowed = 'move';
+          card.classList.add('dragging');
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          card.classList.add('drag-over-target');
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('drag-over-target'));
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          card.classList.remove('drag-over-target');
+          const fromIndex = Number(e.dataTransfer.getData('text/plain'));
+          const toIndex = Number(card.dataset.index);
+          if (Number.isNaN(fromIndex) || fromIndex === toIndex) return;
+          const reordered = [...photos];
+          const [moved] = reordered.splice(fromIndex, 1);
+          reordered.splice(toIndex, 0, moved);
+          photos = reordered;
+          renderAll();
+          saveOrder(reordered);
+        });
+      }
+
+      gallery.appendChild(card);
+    }
+
+    function renderAll(){
+      gallery.innerHTML = '';
+      if (photos.length === 0){
+        renderEmptyState();
+      } else {
+        photos.forEach((p, i) => addCard(p, i));
+      }
+      updateCounter();
+    }
+
+    async function refresh(){
+      try {
+        const { data } = await loadData();
+        photos = data[key] || [];
+        renderAll();
+      } catch (err){
+        console.error(err);
+        renderEmptyState();
+      }
+    }
+
+    function saveCaption(id, caption){
+      queueWrite(async () => {
+        setSyncStatus('saving…');
+        for (let attempt = 0; attempt < 3; attempt++){
+          try {
+            const { data, sha } = await ghGetJson(DATA_PATH);
+            const list = data[key] || [];
+            const item = list.find(p => p.id === id);
+            if (item) item.caption = caption;
+            await ghPutJson(DATA_PATH, data, `Update caption in ${key}`, sha);
+            setSyncStatus('synced');
+            return;
+          } catch (err) {
+            if (attempt < 2){
+              setSyncStatus('retrying…');
+              await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+            } else {
+              setSyncStatus('error');
+              throw err;
+            }
+          }
+        }
+      });
+    }
+
+    function saveOrder(newOrderPhotos){
+      queueWrite(async () => {
+        setSyncStatus('saving…');
+        for (let attempt = 0; attempt < 3; attempt++){
+          try {
+            const { data, sha } = await ghGetJson(DATA_PATH);
+            data[key] = newOrderPhotos.map(({ id, name, caption, path, type }) => ({ id, name, caption, path, type }));
+            await ghPutJson(DATA_PATH, data, `Reorder ${key}`, sha);
+            setSyncStatus('synced');
+            return;
+          } catch (err) {
+            if (attempt < 2){
+              setSyncStatus('retrying…');
+              await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+            } else {
+              setSyncStatus('error');
+              throw err;
+            }
+          }
+        }
+      });
+    }
+
+    function removePhoto(id){
+      const photo = photos.find(p => p.id === id);
+      if (!photo) return;
+      photos = photos.filter(p => p.id !== id);
+      renderAll();
+      queueWrite(async () => {
+        setSyncStatus('saving…');
+        for (let attempt = 0; attempt < 3; attempt++){
+          try {
+            const { data, sha } = await ghGetJson(DATA_PATH);
+            data[key] = (data[key] || []).filter(p => p.id !== id);
+            await ghPutJson(DATA_PATH, data, `Remove photo from ${key}`, sha);
+            await ghDeleteFile(photo.path, `Delete photo file from ${key}`);
+            setSyncStatus('synced');
+            return;
+          } catch (err) {
+            if (attempt < 2){
+              setSyncStatus('retrying…');
+              await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+            } else {
+              setSyncStatus('error');
+              throw err;
+            }
+          }
+        }
+      });
+    }
+
+    async function handleFiles(fileList){
+      const files = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+      if (!files.length) return;
+
+      dropzone.classList.add('uploading');
+      const bigVideos = [];
+
+      try {
+        for (const file of files){
+          const isVideo = file.type.startsWith('video/');
+          // GIFs get re-encoded to a static JPEG by compressImage, which
+          // silently kills the animation — skip compression for them.
+          const isGif = file.type === 'image/gif';
+          if (isVideo && file.size > 15 * 1024 * 1024) bigVideos.push(file.name);
+
+          setSyncStatus(`uploading ${file.name}…`);
+          const skipCompression = isVideo || isGif;
+          const blob = skipCompression ? file : await compressImage(file).catch(() => file);
+          const base64 = await blobToBase64(blob);
+          const ext = isVideo ? (file.name.split('.').pop() || 'mp4') : (isGif ? 'gif' : 'jpg');
+          const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+          const filePath = `photos/${key}/${Date.now()}_${safeName.split('.')[0]}.${ext}`;
+
+          await queueWrite(async () => {
+            await ghPutBinary(filePath, base64, `Add photo to ${key}`);
+            const { data, sha } = await ghGetJson(DATA_PATH);
+            data[key] = data[key] || [];
+            data[key].push({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              name: file.name,
+              caption: '',
+              path: filePath,
+              type: isVideo ? 'video' : 'image'
+            });
+            await ghPutJson(DATA_PATH, data, `Add photo metadata to ${key}`, sha);
+          });
+        }
+        setSyncStatus('synced');
+        await refresh();
+      } catch (err){
+        console.error(err);
+        alert('Upload failed — check the console for details. Make sure your GitHub token has write access to this repo.');
+        setSyncStatus('error');
+      } finally {
+        dropzone.classList.remove('uploading');
+      }
+
+      if (bigVideos.length){
+        alert(`Heads up: ${bigVideos.join(', ')} ${bigVideos.length === 1 ? 'is a large video file' : 'are large video files'}. Consider trimming or shrinking large videos before upload.`);
+      }
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+      fileInput.value = '';
+    });
+
+    ['dragenter','dragover'].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag-over');
+      })
+    );
+
+    ['dragleave','drop'].forEach(evt =>
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag-over');
+      })
+    );
+
+    dropzone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    });
+
+    galleries[key] = { refresh, renderAll: () => renderAll() };
+
+    if (!notConfigured){
+      refresh();
+    } else {
+      renderEmptyState();
+    }
+  }
+
+  createGallery({
+    key: 'main',
+    dropzoneId: 'mainDropzone',
+    fileInputId: 'mainFileInput',
+    galleryId: 'mainGallery',
+    counterId: 'mainCounter',
+    emptyText: 'No photos yet.',
+    counterWord: 'photo'
+  });
+
+  createGallery({
+    key: 'secret',
+    dropzoneId: 'secretDropzone',
+    fileInputId: 'secretFileInput',
+    galleryId: 'secretGallery',
+    counterId: 'secretCounter',
+    emptyText: 'No beans yet.',
+    counterWord: 'toe bean'
+  });
+
+  // ---------- Secret reveal ----------
+  const secretBtn = document.getElementById('secretBtn');
+  const secretSection = document.getElementById('secretSection');
+  secretBtn.addEventListener('click', () => {
+    const opening = !secretSection.classList.contains('open');
+    secretSection.classList.toggle('open');
+    if (opening) secretSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // ---------- Admin auth (GitHub token) ----------
+  const adminTrigger = document.getElementById('adminTrigger');
+  const authModal = document.getElementById('authModal');
+  const authToken = document.getElementById('authToken');
+  const authGo = document.getElementById('authGo');
+  const authCancel = document.getElementById('authCancel');
+  const authError = document.getElementById('authError');
+  const lockBtn = document.getElementById('lockBtn');
+
+  function openAuthModal(){
+    authModal.classList.add('open');
+    authToken.value = '';
+    authError.textContent = '';
+    authToken.focus();
+  }
+  function closeAuthModal(){ authModal.classList.remove('open'); }
+
+  adminTrigger.addEventListener('click', openAuthModal);
+  authCancel.addEventListener('click', closeAuthModal);
+  authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+
+  async function tryUnlock(){
+    authError.textContent = '';
+    const token = authToken.value.trim();
+    if (!token){
+      authError.textContent = 'Paste your token first.';
+      return;
+    }
+    try {
+      const res = await fetch(API_BASE, { headers: { Authorization: `token ${token}` } });
+      if (!res.ok) throw new Error('bad token or repo');
+      const repoData = await res.json();
+      if (!repoData.permissions || !repoData.permissions.push){
+        authError.textContent = 'This token can\'t write to the repo. Check its permissions.';
+        return;
+      }
+      ghToken = token;
+      isAdmin = true;
+      document.body.classList.add('admin-on');
+      closeAuthModal();
+      setSyncStatus('synced');
+      await galleries.main.refresh();
+      await galleries.secret.refresh();
+    } catch (err){
+      console.error(err);
+      authError.textContent = 'Sign-in failed — check your token and repo settings.';
+    }
+  }
+
+  authGo.addEventListener('click', tryUnlock);
+  authToken.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+
+  lockBtn.addEventListener('click', async () => {
+    ghToken = null;
+    isAdmin = false;
+    document.body.classList.remove('admin-on');
+    await galleries.main.refresh();
+    await galleries.secret.refresh();
+  });
+</script>
+
+</body>
+</html>
